@@ -1,0 +1,184 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap');
+body{
+        margin: 0;
+    padding: 0;
+    border: 0;
+}
+.division{
+    background-color: antiquewhite;
+    color: rgba(0, 0, 0, 0.878);
+    font-family: 'Open Sans', sans-serif;
+    height: 100vh;
+}
+.div_main_flex{
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    flex-grow: 2;
+}
+.mark{
+    color: red;
+}
+.search .caixa{
+    width: 900px;
+    height: 50px;
+}
+.search{
+    margin: 0 10vw;
+}
+.nav{
+    display: flex;
+    gap: 10px;
+    align-self: end;
+    background-color: rgb(176, 176, 249);
+    padding: 5px;
+}
+.nav a{
+    text-decoration: none;
+    color: black;
+}
+.nav a::after{
+    content: '|';
+    color: white;
+}
+
+.intro_start{
+    width: 700px;
+    margin: 0 15vw;
+    padding: 10px;
+    border: 1px solid black;
+    box-shadow: 10px 5px 5px black;
+    background-color: white;
+}
+.division{
+    display: flex;
+}
+.boards{
+    height: 300px;
+    width: 220px;
+    background-color: white;
+    border: 1px solid black;
+    box-shadow: 5px 5px 5px black;
+}
+.boards h2{
+    text-align: center;
+}
+.boards ul li{
+    margin-bottom: 9px;
+}
+.formulario_post{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.title_form_post{
+width: 600px;
+padding: 5px;
+border-radius: 5px;
+border: 1px solid black;
+}
+.texto_form_post{
+padding: 5px;
+width: 600px;
+height: 130px;
+border-radius: 5px;
+border: 1px solid black;
+}
+.btn_form_post{
+    width: 120px;
+    height: 35px;
+    background-color: white;
+    border: 1px solid black;
+    border-radius: 5px ;
+}
+
+.aviso{
+    color: red;
+}
+
+/* posts */
+
+.titulo_post{
+    font-weight: bold;
+}
+.bio_post{
+    width: 400px;
+}
+.img_post{
+    width: 400px;
+    height: 400px;
+}
+.post_box{
+    border: 2px solid black;
+    border-radius: 5px;
+    text-align: center;
+    /*align-items: center;*/
+    width: 420px;
+
+    margin: 15px auto;
+    margin-bottom: 15px;
+    padding: 10px;
+ 
+}
+.container_post{
+    justify-content: center;
+}
+
+
+.clicou_up{
+    background-color: rgb(123, 214, 123);
+}
+.clicou_down{
+    background-color: rgb(241, 116, 116);
+}
+.carregando{
+    text-align: center;
+    font-size: 80px;
+    font-weight: bold;
+    color: red;
+}
+ .container_post{
+    width: 100vw;
+    height: fit-content;
+} 
+.tec{
+    background-color: rgb(227, 231, 253);
+    height: 160px;
+}
+.pol{
+    background-color: rgb(168, 250, 183);
+    height: 160px;
+}
+.ent{
+    background-color: rgb(250, 168, 168);
+    height: 160px;
+}
+.al{
+    background-color: rgb(168, 250, 249);
+    height: 160px;
+}
+.fin{
+    background-color: rgb(240, 250, 168);
+    height: 160px;
+}
+.reportar{
+    color: red;
+    float: right;
+}
+.alerta{
+    color: red;
+    font-weight: bold;
+}
+button{
+    padding: 5px;
+    border-radius: 5px;
+    background-color: rgb(213, 234, 252);
+}
+.red{
+    color: red;
+    font-weight: bold;
+}
+.green{
+    color: rgb(27, 181, 27);
+    font-weight: bold;
+}
