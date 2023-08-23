@@ -1,7 +1,8 @@
-import React from "react"
+import React, { useState } from "react"
 import header from "./Header"
 
 export default function Adm(){
+    const [erro,setErro] = useState()
  const [dados, setDados] = React.useState();
  const [form,setForm] = React.useState({
     texto: '',
@@ -15,6 +16,7 @@ export default function Adm(){
         body: JSON.stringify({tokenJWT: localStorage.getItem('tokenJWT')})
     })
     const dados = await res.json()
+    if(dados.erro)setErro(dados.erro)
     setDados(dados.users)
     console.log(dados);
    } 
@@ -32,8 +34,6 @@ export default function Adm(){
         }
         const res = await fetch("http://localhost/projeto-forum/php/adm.php", config);
         const dados = await res.json();
-        console.log(form)
-        console.log(dados)
         window.location.href = "/" 
     }
     //Pegando id do usuario para enviar junto a mensagem
@@ -45,7 +45,7 @@ export default function Adm(){
         console.log(id)
       };
     
-    if(dados){
+    if(dados && !dados.erro){
         return (
                 <form onSubmit={handleSubmit} method="post" style={{display: "flex", flexDirection: "column"}}>
                 <select onChange={handleOpt} name="username" style={{width: '200px'}}>
@@ -63,7 +63,9 @@ export default function Adm(){
             <button style={{width: '200px'}} type="submit">Enviar</button>
             </form>
         )
+    }else if(erro){
+        return <p className="alerta">Sem permissão</p>
     } else{
-       return <>Carregando</>
+       return <p className="carregando"> Carregando</p>
     } 
 }

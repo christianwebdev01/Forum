@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState } from "react"
 import header from "./Header"
 import { Link } from "react-router-dom";
 import Nav from './Nav.jsx'
@@ -6,6 +6,7 @@ import Nav from './Nav.jsx'
 import he from 'he';
 
 export default function Account(){
+    const [erro,setErro] = useState();
     const [valido,setValido] = React.useState();
     const [foto,setFoto] = React.useState('');
     const [bio,setBio] = React.useState('');
@@ -26,6 +27,8 @@ export default function Account(){
     }) 
     //Compara a signature e o tempo de expiração
     const dados = await response.json()
+    console.log(dados)
+    if(dados.erro) setErro(dados.erro);
     setValido(dados.valido)
 
     //Se foto,bio,nome e username existem:
@@ -45,8 +48,10 @@ export default function Account(){
 React.useEffect(() => {
 fetchD()   
 },[])
-    if(valido === undefined){
-        return <div>Carregando...</div>
+    if(valido === undefined && !erro){
+        return <div className="carregando">Carregando...</div>
+    } else if(erro){
+        return <p className="alerta">{erro}</p>
     }
     else if(valido === 1){
         return (

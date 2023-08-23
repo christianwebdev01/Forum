@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import header from "./Header"
 import Nav from "./Nav";
 export default function Mensagens(){
+    const [erro,setErro] = useState()
     const [mensagens,setMensagens] = React.useState();
 
 async function fetchD(){
@@ -12,6 +13,7 @@ async function fetchD(){
         body: JSON.stringify({tokenJWT: localStorage.getItem('tokenJWT')})
        })
     const dados = await res.json()
+    if(dados.erro) setErro(dados.erro)
     setMensagens(dados.msg)
     console.log(dados.msg)
 }
@@ -20,7 +22,7 @@ async function fetchD(){
         fetchD()
     },[])
 
-    if(mensagens){
+    if(mensagens && !erro){
         return (
             <>
             <Nav/>
@@ -34,8 +36,10 @@ async function fetchD(){
            })}
             </>
         )
+    }else if(!erro && !mensagens){
+        return <p className="carregando">Carregando</p>
     }else{
-        return <p>Não está logado</p>
+        return <p className="alerta">Não está logado</p>
     }
   
 }

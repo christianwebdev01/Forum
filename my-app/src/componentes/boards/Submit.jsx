@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom"
+import header from "../Header";
 
 
 export default function Submit(){
 
+    const [erro,setErro] = useState('')
     const query = window.location.search;
     const url = new URLSearchParams(query)
     const voltar = url.get('voltar')
@@ -19,39 +21,39 @@ export default function Submit(){
         tempo: data.toLocaleTimeString(),
         data: data.toLocaleDateString()
     })
-    console.log(dados.imagem)
     const body = {
         tokenJWT:localStorage.getItem('tokenJWT'),
         dados: dados
     }
     
-    
     async function fetchD(){
         const response = await fetch('http://localhost/projeto-forum/php/post.php',{
         method: 'POST',
-        headers: { 
-        'Content-Type': 'application/json', 
-        'X-Requested-With': 'XMLHttpRequest',
-        'Origin': 'http://localhost:3000',
-        'Accept': 'application/json'},
+        headers: header,
         credentials: 'include',
         body: JSON.stringify(body)
     });
     const dados = await response.json()
-    
-    
-    {voltar === 'tec' && window.location.replace('http://localhost:3000/boards/tec')}
-    {voltar === 'ent' && window.location.replace('http://localhost:3000/boards/ent')}
-    {voltar === 'al' && window.location.replace('http://localhost:3000/boards/al')}
-    {voltar === 'fin' && window.location.replace('http://localhost:3000/boards/fin')}
-    {voltar === 'pol' && window.location.replace('http://localhost:3000/boards/pol')}
+    //console.log(dados)
+
+    if(dados.erro) setErro(dados.erro) 
+    else setErro(null)
+    console.log(erro)
+       
     }
+    useEffect(()=>{
+       if(erro === null){
+        {voltar === 'tec' && window.location.replace('http://localhost:3000/boards/tec')}
+        {voltar === 'ent' && window.location.replace('http://localhost:3000/boards/ent')}
+        {voltar === 'al' && window.location.replace('http://localhost:3000/boards/al')}
+        {voltar === 'fin' && window.location.replace('http://localhost:3000/boards/fin')}
+        {voltar === 'pol' && window.location.replace('http://localhost:3000/boards/pol')}
+       }
+    },[erro])
+
     function handleSub(ev){
         ev.preventDefault()
-        console.log(dados)
-
         fetchD()
-        
     }
     const handleImg = (event) => {
             const file = event.target.files[0];
@@ -68,6 +70,7 @@ export default function Submit(){
     }
     return (
         <div>
+            {erro && <p className="alerta">{erro}</p>}
             Comunidade - {b}
             <form encType="multipart/form-data" onSubmit={handleSub} className="formulario_post" method="post">
                 <input onChange={(e) => setDados({...dados, title: e.target.value})} className="title_form_post" name="title" placeholder="Title" type="text"/>
