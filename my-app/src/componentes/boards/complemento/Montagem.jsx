@@ -7,6 +7,7 @@ import Votos from './Votos'
 import header from "../../Header";
 
 export default function Montagem(comunidade, sigla) {
+    const [post_id,setPost_id] = useState()
     const [alerta,setAlerta] = useState('')
     const [up,setUp] = useState({})
     const [classe,setClasse] = useState({})
@@ -28,12 +29,9 @@ export default function Montagem(comunidade, sigla) {
     //Limite de renderizações
     const MAX_RENDERS = 1;
 
-    //Incremento de render para uma segunda render(Motivo: atualizar relação do usuário com post -upvote,downvote)
-    const [renderCount, setRenderCount] = useState(0);
 
      //Dispara um re-render ao votar(clicando), fazendo um fetch com os novos valores de votos no DB
     const [load, setLoad] = useState();
-
     const [dado, setDado] = useState([]);
     const [postsRenderizados, setPostsRenderizados] = useState([]);
 
@@ -107,11 +105,12 @@ export default function Montagem(comunidade, sigla) {
                     })
 
                     //Ao dar upvote:
-                    function handleClick(ev) {
-                        
+                    function handleClick() {
                        if(!alerta){
+                        setPost_id(()=>item.postagens_id)
+                        setTudoProntoPraRender(2)
                         if(classe[id]){
-                            setPosition_saved(prev => {
+                            setPosition_saved(() => {
                                 const atual = window.scrollY
                                 return atual
                             })
@@ -148,7 +147,9 @@ export default function Montagem(comunidade, sigla) {
                     function downvote(){
                         //salvando posição vertical ao clicar no voto:
                        if(!alerta){
-                        setPosition_saved(prev => {
+                        setPost_id(()=>item.postagens_id)
+                        setTudoProntoPraRender(2)
+                        setPosition_saved(() => {
                             const atual = window.scrollY
                             return atual
                         })
@@ -177,7 +178,7 @@ export default function Montagem(comunidade, sigla) {
                        }
                     }      
                     return(
-                        <div className='post_box'>
+                        <div className={`post_box POST_${item.postagens_id}`}>
                             {valido === 0 && `Postado a ${d_diff} Dias`}
                             {(valido === 1) && (itens_data_diff[1] !== 0) ? `Postado a ${itens_data_diff[1]} horas` : ''}
                             {(valido === 1) && (itens_data_diff[1] === 0) ? "Postado a alguns minutos": ''}
@@ -205,6 +206,9 @@ export default function Montagem(comunidade, sigla) {
      
     }, [dado]);
 
+        //Incremento de render para uma segunda render(Motivo: atualizar relação do usuário com post -upvote,downvote)
+        const [renderCount, setRenderCount] = useState(0);
+
     useEffect(() =>{
         if(renderCount < MAX_RENDERS){
          setTimeout(() => {
@@ -215,15 +219,23 @@ export default function Montagem(comunidade, sigla) {
          },800)
          //suficiente para carregar relações
         }
-     },[renderCount])
+     },[])
+     const [scroll,setScroll] = useState(0)
 
          //Ao fazer update, volta para a posição vertical onde o usuario se encontrava
     useEffect(()=>{
         setTimeout(()=>{
             //impede que a rolagem aconteça na segundo update
-            position_saved > 1030.4000244140625 && window.scrollTo(0, position_saved)
-        },1000)
-    },[load])
+            //position_saved > 1030.4000244140625 && window.scrollTo(0, position_saved)
+            if (post_id) {
+                const postElement = document.querySelector(`.POST_${post_id}`); // Substitua "post_" pelo prefixo da classe do post
+                if (postElement) {
+                    postElement.scrollIntoView({ behavior: "smooth" });
+                }
+            }
+            
+        },300)
+    },[scroll])
 
     useEffect(()=>{
         //Ordenando posts por total de upvotes
@@ -235,13 +247,16 @@ export default function Montagem(comunidade, sigla) {
      })
      //Para finalmente renderizar as postagens:
      setTimeout(()=> {
+        console.log('pode renderizar')
         setTudoProntoPraRender(2)
-    },1500)
+        //Faz com que o scroll só aconteça após posts estarem renderizados
+        if(scroll ===0)setScroll(1)
+        else setScroll(prev => prev+1)
+        //Tempo para finalizar updates
+    },2000)
 
      setPostsRenderizados(() => novo)
     },[tudo_pronto_pra_render])
-
-
 
 
   return (
@@ -252,7 +267,7 @@ export default function Montagem(comunidade, sigla) {
                 {tudo_pronto_pra_render === 2 ?
                     postsRenderizados
                  : 
-                 <h1 className="carregando">Carregando...</h1>}
+                 <h1 className="carregando">Carregando postagens...</h1>}
             </div>
         </div>
     );
