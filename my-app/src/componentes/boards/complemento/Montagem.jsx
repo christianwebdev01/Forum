@@ -23,7 +23,6 @@ export default function Montagem(comunidade, sigla) {
         const res = await fetch("http://localhost/projeto-forum/php/upvotes.php",config)
         const dado = await res.json()
         if(dado.erro)setAlerta(dado.erro)
-        console.log(dado)
     }
 
     //Limite de renderizações
@@ -35,32 +34,10 @@ export default function Montagem(comunidade, sigla) {
      //Dispara um re-render ao votar(clicando), fazendo um fetch com os novos valores de votos no DB
     const [load, setLoad] = useState();
 
-    useEffect(() =>{
-       if(renderCount < MAX_RENDERS){
-        setTimeout(() => {
-            setPostsRenderizados([]);
-            setLoad(new Date());
-            setRenderCount( prev => prev + 1)
-            setTudoProntoPraRender(1)
-        },800)
-        //suficiente para carregar relações
-       }
-    },[renderCount])
-
-    //Ao fazer update, volta para a posição vertical onde o usuario se encontrava
-    useEffect(()=>{
-        console.log('pos '+position_saved)
-        setTimeout(()=>{
-            //impede que a rolagem aconteça na segundo update
-            position_saved > 1030.4000244140625 && window.scrollTo(0, position_saved)
-        },1000)
-    },[load])
-
     const [dado, setDado] = useState([]);
     const [postsRenderizados, setPostsRenderizados] = useState([]);
 
-    
-    //Fetch que contém as postagens no DB e seus metadados
+//Fetch para receber postagens
     useEffect(() => {
         fetch_voto()
         Fetch(comunidade).then((data) => {
@@ -68,6 +45,7 @@ export default function Montagem(comunidade, sigla) {
         });
     }, [load]);
 
+    //Ativa update de dado:
     useEffect(() => {
         const renderizarPosts = async () => { 
             const posts = await Promise.all(
@@ -135,7 +113,6 @@ export default function Montagem(comunidade, sigla) {
                         if(classe[id]){
                             setPosition_saved(prev => {
                                 const atual = window.scrollY
-                                console.log('atual')
                                 return atual
                             })
                             if(classe[id].up === 'clicou_up'){
@@ -169,7 +146,6 @@ export default function Montagem(comunidade, sigla) {
 
                     //ao clicar em downvote
                     function downvote(){
-                        //console.log(window.scrollY)
                         //salvando posição vertical ao clicar no voto:
                        if(!alerta){
                         setPosition_saved(prev => {
@@ -199,8 +175,7 @@ export default function Montagem(comunidade, sigla) {
                             return atual
                         })
                        }
-                    }
-                    
+                    }      
                     return(
                         <div className='post_box'>
                             {valido === 0 && `Postado a ${d_diff} Dias`}
@@ -230,14 +205,62 @@ export default function Montagem(comunidade, sigla) {
      
     }, [dado]);
 
-    
-    return (
+    useEffect(() =>{
+        if(renderCount < MAX_RENDERS){
+         setTimeout(() => {
+             setPostsRenderizados([]);
+             setLoad(new Date());
+             setTimeout(() => setTudoProntoPraRender(1),1000)
+             setRenderCount( prev => prev + 1)
+         },800)
+         //suficiente para carregar relações
+        }
+     },[renderCount])
+
+         //Ao fazer update, volta para a posição vertical onde o usuario se encontrava
+    useEffect(()=>{
+        setTimeout(()=>{
+            //impede que a rolagem aconteça na segundo update
+            position_saved > 1030.4000244140625 && window.scrollTo(0, position_saved)
+        },1000)
+    },[load])
+
+    useEffect(()=>{
+        //Ordenando posts por total de upvotes
+        const sortedPosts = [...postsRenderizados];
+        const novo = sortedPosts.sort(function(a,b){
+            const item1 = a.props.children[9].props.children
+            const item2 = b.props.children[9].props.children
+            return item2 - item1;
+     })
+     //Para finalmente renderizar as postagens:
+     setTimeout(()=> {
+        setTudoProntoPraRender(2)
+    },1500)
+
+     setPostsRenderizados(() => novo)
+    },[tudo_pronto_pra_render])
+
+
+
+
+  return (
         <div className={comunidade}>
             <Link to={`/boards/submit/${comunidade}?voltar=${sigla}`}>Criar post</Link>
             <div className='container_post'>
                 {alerta && <span className="alerta">MODO VIEW:<br></br>{alerta}*</span>}
-                {tudo_pronto_pra_render === 1 ? postsRenderizados : <h1 className="carregando">Carregando...</h1>}
+                {tudo_pronto_pra_render === 2 ?
+                    postsRenderizados
+                 : 
+                 <h1 className="carregando">Carregando...</h1>}
             </div>
         </div>
     );
 }
+
+
+
+
+
+
+
