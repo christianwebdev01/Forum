@@ -51,6 +51,6 @@ if($valido){
     ));
 echo json_encode(['msg' => 'Successo']);
 } else{
-    $retorno = "Erro";
+    echo json_encode(['erro' => 'Não logado corretamente no sistema no sistema ']);
 }
 ?>

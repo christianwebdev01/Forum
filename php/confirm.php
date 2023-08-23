@@ -18,6 +18,9 @@ if(isset($_GET['papel'])){
     echo json_encode(["users"=>$res]);
     return;
     }
+  } else{
+    echo json_encode(['erro'=> 'Sem permissão']);
+    exit();
   }
   
 }
@@ -60,12 +63,16 @@ if($token[2] === $sigv){
 } else {
     $valido = 0;
 }
-echo json_encode([
-        'valido' => 1,
-        'nome' => $_SESSION['nome'],
-        'username' => $_SESSION['username'],
-        'bio' => $res[0],
-        'foto' => base64_encode($res[1])
-    ])
+if($valido){
+  echo json_encode([
+    'valido' => 1,
+    'nome' => $_SESSION['nome'],
+    'username' => $_SESSION['username'],
+    'bio' => $res[0],
+    'foto' => base64_encode($res[1])
+  ]);
+} else{
+echo json_encode(['erro'=> 'Não logado corretamente, faça o login']);
+}
 
 ?>

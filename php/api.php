@@ -51,7 +51,7 @@ if(isset($_GET['msg'])){
   if($jwt === $_SESSION['sigv'] && $exp > time()){
     echo json_encode(['msg' => $mensagens]);
   } else{
-    echo json_encode(['msg' => 'Token expirado ou inválido']);
+    echo json_encode(['erro' => 'Token expirado ou inválido']);
   }
   return;
 }
