@@ -23,17 +23,8 @@ $exp = $dado['expiration'];
 $jwt = $dado['token'][2];
 $sigv = $_SESSION['sigv'];
 
-if($jwt === $sigv){
-    //Compara o unix-timestamp gerado pela react na hora do login com o atual gerado pelo php
-    if($exp > time()){
-        $valido = 1;
-        
-    } else{
-        $valido = 0;
-    }
-} else {
-    $valido = 0;
-}
+require_once('token_val.php');
+$valido = validation($jwt,$exp);
 
 //Inserção no BD
 if($valido){

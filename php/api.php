@@ -4,8 +4,6 @@ session_start();
 
 $dados = json_decode(file_get_contents('php://input'), true);
 
-//teste
-
 if(isset($_GET['voto'])){
   if($_SERVER['REQUEST_METHOD'] === 'POST'){
     require_once('pdo.php');
@@ -30,8 +28,6 @@ if(isset($_GET['voto'])){
   }
 }
 
-//---
-
 $username = htmlentities($dados['username']);
 
 $arr = json_decode($dados['tokenJWT'],true);
@@ -48,12 +44,12 @@ if($_SESSION['papel'] === 0){
 }
 
 if(isset($_GET['msg'])){
-  if($jwt === $_SESSION['sigv'] && $exp > time()){
-    echo json_encode(['msg' => $mensagens]);
-  } else{
-    echo json_encode(['erro' => 'Token expirado ou inválido']);
-  }
-  return;
+require_once('token_val.php');
+
+$valido = validation($jwt,$exp);
+if($valido)echo json_encode(['msg' => $mensagens]);
+else echo json_encode(['erro' => 'Token expirado ou inválido']);
+return;
 }
 
 

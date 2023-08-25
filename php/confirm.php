@@ -9,20 +9,18 @@ $jwt = $dado['token'][2];
 
 //Quando recebo papel = 1(true) pela query, o php envia a lista de usuários para a página adm.jsx
 if(isset($_GET['papel'])){
-  if($jwt === $_SESSION['sigv'] && $exp > time()){
-    //0 no BD significa maior privilégio, 1 para moderador e 2 para usuário comum
-    if($_SESSION['papel'] === 0){
-    require_once('pdo.php');
-    $quer = $pdo->query("SELECT username,usuarios_id FROM usuarios");
-    $res = $quer->fetchAll(PDO::FETCH_ASSOC);
-    echo json_encode(["users"=>$res]);
-    return;
-    }
-  } else{
-    echo json_encode(['erro'=> 'Sem permissão']);
-    exit();
-  }
-  
+require_once('token_val.php');
+$valido = validation($jwt,$exp);
+if($valido && $_SESSION['papel'] === 0){
+  require_once('pdo.php');
+  $quer = $pdo->query("SELECT username,usuarios_id FROM usuarios");
+  $res = $quer->fetchAll(PDO::FETCH_ASSOC);
+  echo json_encode(["users"=>$res]);
+  exit();
+} else{
+  echo json_encode(['erro'=> 'Sem permissão']);
+  exit();
+}
 }
 
 //O componente logout.jsx faz um request do nome do usuario
@@ -49,27 +47,16 @@ if($input['id']){
 }
 $token = $dado['token'];
 
-$sigv = $_SESSION['sigv'];
+require_once('token_val.php');
+$valido = validation($token[2],$exp);
 
-if($token[2] === $sigv){
-    //Compara o unix-timestamp gerado pela react na hora do login com o atual gerado pelo php
-   if($exp > time()){
-    $valido = 1;
-    $res = [$_SESSION['bio'], $_SESSION['foto']];
-     
-} else{
-    $valido = 0;
-   }
-} else {
-    $valido = 0;
-}
 if($valido){
   echo json_encode([
     'valido' => 1,
     'nome' => $_SESSION['nome'],
     'username' => $_SESSION['username'],
-    'bio' => $res[0],
-    'foto' => base64_encode($res[1])
+    'bio' => $_SESSION['bio'],
+    'foto' => base64_encode($_SESSION['foto'])
   ]);
 } else{
 echo json_encode(['erro'=> 'Não logado corretamente, faça o login']);
