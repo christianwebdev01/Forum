@@ -5,6 +5,7 @@ import Parse from './Parse'
 import { Link } from "react-router-dom";
 import Votos from './Votos'
 import header from "../../Header";
+import msg_icon from '../../../assets/comment.png'
 
 export default function Montagem(comunidade, sigla) {
     const [post_id,setPost_id] = useState()
@@ -12,7 +13,6 @@ export default function Montagem(comunidade, sigla) {
     const [up,setUp] = useState({})
     const [classe,setClasse] = useState({})
     const [tudo_pronto_pra_render,setTudoProntoPraRender] = React.useState(0)
-    const [position_saved,setPosition_saved] = useState(window.scrollY)
     
     async function fetch_voto(){
         const config = {
@@ -23,19 +23,19 @@ export default function Montagem(comunidade, sigla) {
         }
         const res = await fetch("http://localhost/projeto-forum/php/upvotes.php",config)
         const dado = await res.json()
+        console.log(dado)
         if(dado.erro)setAlerta(dado.erro)
     }
 
     //Limite de renderizações
     const MAX_RENDERS = 1;
 
-
      //Dispara um re-render ao votar(clicando), fazendo um fetch com os novos valores de votos no DB
     const [load, setLoad] = useState();
     const [dado, setDado] = useState([]);
     const [postsRenderizados, setPostsRenderizados] = useState([]);
 
-//Fetch para receber postagens
+    //Fetch para receber postagens
     useEffect(() => {
         fetch_voto()
         Fetch(comunidade).then((data) => {
@@ -50,7 +50,7 @@ export default function Montagem(comunidade, sigla) {
                 dado.map(async function(item) {
                 
                     //Pega data da postagem e atual para dizer à quantas horas/dias foi feita
-                    const itens_data_diff = Tempo(item);
+                    const itens_data_diff = Tempo(item.tempo);
                     const data1 = Parse(item.data);
                     const data2 = Parse(itens_data_diff[0]);
                     const d_diff = (data2 - data1) / (1000 * 60 * 60 * 24);
@@ -65,6 +65,7 @@ export default function Montagem(comunidade, sigla) {
                     
                     const totals = {}
                     const dados = await Votos(item.postagens_id);
+                    const total_comment = dados.total_comment
 
                         for (const item of dado) {
                             const dados = await Votos(item.postagens_id);
@@ -106,14 +107,14 @@ export default function Montagem(comunidade, sigla) {
 
                     //Ao dar upvote:
                     function handleClick() {
-                       if(!alerta){
+                        //reinicia renders para poder fazer scroll novamente:
+                        setRenders(() => 0)
+                        //atualiza estado com id do post para a pagina poder posteriormente rolar até ele 
                         setPost_id(()=>item.postagens_id)
-                        setTudoProntoPraRender(2)
+
+                       if(!alerta){
+                        setTudoProntoPraRender(1)
                         if(classe[id]){
-                            setPosition_saved(() => {
-                                const atual = window.scrollY
-                                return atual
-                            })
                             if(classe[id].up === 'clicou_up'){
                                 setClasse({...classe, [id]: {down: 'neutro', up:  'neutro' }})
                                 setClasse(prev => ({
@@ -145,14 +146,11 @@ export default function Montagem(comunidade, sigla) {
 
                     //ao clicar em downvote
                     function downvote(){
+                        setRenders(() => 0)
                         //salvando posição vertical ao clicar no voto:
-                       if(!alerta){
                         setPost_id(()=>item.postagens_id)
-                        setTudoProntoPraRender(2)
-                        setPosition_saved(() => {
-                            const atual = window.scrollY
-                            return atual
-                        })
+                       if(!alerta){
+                        setTudoProntoPraRender(1)
                         if(classe[id]){
                             if(classe[id].down === 'clicou_down'){
                                 setClasse({...classe,[id]: {up: 'neutro', down:'neutro'}})
@@ -177,12 +175,17 @@ export default function Montagem(comunidade, sigla) {
                         })
                        }
                     }      
+
+                    //Condicionais abaixo para caso a postagem tenha sido feita a um dia ou dias, uma hora ou horas.
+                    const dia = `Postado a ${d_diff} Dia`;
+                    const hora = `Postado a ${itens_data_diff[1]} hora`;
+        //console.log(total_comment.length)
                     return(
                         <div className={`post_box POST_${item.postagens_id}`}>
-                            {valido === 0 && `Postado a ${d_diff} Dias`}
-                            {(valido === 1) && (itens_data_diff[1] !== 0) ? `Postado a ${itens_data_diff[1]} horas` : ''}
+                            {valido === 0 ? d_diff === 1 ? dia : `${dia}s` : ''}
+                            {(valido === 1) && (itens_data_diff[1] !== 0) ? (itens_data_diff[1] === 1) ? hora : `${hora}s` : ''}
                             {(valido === 1) && (itens_data_diff[1] === 0) ? "Postado a alguns minutos": ''}
-                        <Link to='/report' className="reportar">Reportar</Link>
+                        <Link to='/Report' className="reportar">Reportar</Link>
                         <h1 className='titulo_post'>{item.title}</h1>
                         <p className='bio_post' >{item.texto}</p>
                         {item.imagem && <img className='img_post' src={`data:image/png;base64,${item.imagem}`}/>}
@@ -193,9 +196,11 @@ export default function Montagem(comunidade, sigla) {
                         className={classe[id] ? classe[id].up : (totals[id] >= 1) ? 'green' : (totals[id] < 0) ? 'red' : ''} 
                         onClick={handleClick}>{totals[id]}</button>
                         <button onClick={downvote} className={classe[id] && classe[id].down}>DOWN</button>
+                    
+                        <Link state={{nomeUser: item.username, texto: item.texto, titulo: item.title, imagem: item.imagem}} to={`/post?id=${item.postagens_id}`}><span className="total_comment">{total_comment.length} comentários &#8693;<br/>(clique)</span></Link>
                         <br></br>
                         <span className='feito_por_post'>Feito por - {item.username}</span><br/>
-                            </div>
+                        </div>
                     )
                 })
             );
@@ -224,7 +229,9 @@ export default function Montagem(comunidade, sigla) {
 
          //Ao fazer update, volta para a posição vertical onde o usuario se encontrava
     useEffect(()=>{
+        console.log('disparou 1')
         setTimeout(()=>{
+            console.log('disparou 2')
             //impede que a rolagem aconteça na segundo update
             //position_saved > 1030.4000244140625 && window.scrollTo(0, position_saved)
             if (post_id) {
@@ -234,9 +241,11 @@ export default function Montagem(comunidade, sigla) {
                 }
             }
             
-        },300)
+        },100)
     },[scroll])
 
+    const MAX_R = 1
+    const [renders,setRenders] = useState(0)
     useEffect(()=>{
         //Ordenando posts por total de upvotes
         const sortedPosts = [...postsRenderizados];
@@ -246,17 +255,23 @@ export default function Montagem(comunidade, sigla) {
             return item2 - item1;
      })
      //Para finalmente renderizar as postagens:
-     setTimeout(()=> {
-        console.log('pode renderizar')
-        setTudoProntoPraRender(2)
-        //Faz com que o scroll só aconteça após posts estarem renderizados
-        if(scroll ===0)setScroll(1)
-        else setScroll(prev => prev+1)
-        //Tempo para finalizar updates
-    },2000)
+
+
+    if(renders < MAX_R){
+        setRenders(() => 1)
+        setTimeout(()=> {
+            console.log('pode renderizar')
+            setTudoProntoPraRender(2)
+            //Faz com que o scroll só aconteça após posts estarem renderizados
+            console.log(scroll)
+            if(scroll ===0){setScroll(1)}
+            else {setScroll(prev => prev+1)}
+            //Tempo min para finalizar updates
+        },1900)
+    }
 
      setPostsRenderizados(() => novo)
-    },[tudo_pronto_pra_render])
+    },[tudo_pronto_pra_render,renders])
 
 
   return (

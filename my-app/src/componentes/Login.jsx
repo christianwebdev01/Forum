@@ -35,6 +35,7 @@ export default function Login(){
                 token: tokenArr,
                 expiration: Date.now() + 3600000 //Mais uma hora
             }))
+            localSt('username',form.username)
             //'logado' serve apenas como pista, a verificação de fato ocorre sempre com JWT
             window.sessionStorage.setItem('logado','1')
             window.location.replace("http://localhost:3000");

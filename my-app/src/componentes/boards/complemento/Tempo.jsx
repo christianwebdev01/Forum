@@ -1,4 +1,4 @@
-import React from 'react'
+
 export default function Tempo(item){
 
     //Hora atual separada em H-M-S
@@ -13,7 +13,7 @@ export default function Tempo(item){
     const H_atual = atual_sep.setUTCHours(h_atual,m_atual,s_atual,0) / (1000 * 60 * 60)
 
     //H-M-S do item
-    const tempo_s = item.tempo.split(':')
+    const tempo_s = item.split(':')
     const horas = tempo_s[0]
     const minutos = tempo_s[1]
     const segs = tempo_s[2]

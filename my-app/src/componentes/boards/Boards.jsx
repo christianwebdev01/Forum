@@ -8,10 +8,9 @@ export default function Boards (){
         <div className={classe}>
         <h2>Board</h2>
         <p style={{color:'green'}}>
-        --implementar posts mais relevantes primeiro<br/>
-        --implantar comentarios + contador<br/>
-        --mensagens de erro<br/>
-        --sistema de reportar<br/>
+        --implantar sistema de relevancia mais robusto<br/>
+        --implantar mais personalizações nos posts<br/>
+        --implantar replies<br/>
         </p>
        
         <Outlet/>

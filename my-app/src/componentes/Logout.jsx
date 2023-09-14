@@ -12,7 +12,6 @@ export default function Logout(){
         credentials: 'include',
         body: JSON.stringify({tokenJWT: localStorage.getItem('tokenJWT')})
     })
-    const dados = await response.json()
     
     //Limpeza de dados guardados
     sessionStorage.clear()

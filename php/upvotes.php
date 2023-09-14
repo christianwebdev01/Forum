@@ -14,13 +14,19 @@ if(isset($_GET['upvotes_total'])){
         $dados = json_decode(file_get_contents('php://input'),true);
         $postagens_id = $dados['dado'];
 
-    //pegando linha onde possui o id do usuario pra conferir voto feito
+    //conferir voto feito pelo usuario
     $consulta1= $pdo->prepare("SELECT valor FROM upvotes WHERE postagens_id=:post AND usuarios_id = :user");
     $consulta1->execute(array(
     ':post' => $postagens_id,
     ':user' => $usuarios_id
 ));
 $resultado1 = $consulta1->fetch(PDO::FETCH_ASSOC);
+
+$sql_total_comment = "SELECT comentarios_id FROM comentarios WHERE postagens_id = $postagens_id";
+$linha_ttl = $pdo->prepare($sql_total_comment);
+$linha_ttl->execute();
+$total_comment = $linha_ttl->fetchAll(PDO::FETCH_ASSOC); 
+
     //pegar total de upvotes de um post
     $sql = "SELECT valor FROM upvotes WHERE postagens_id = :id";
     $linha = $pdo->prepare($sql);
@@ -28,7 +34,7 @@ $resultado1 = $consulta1->fetch(PDO::FETCH_ASSOC);
         ':id' => $postagens_id
     ));
     $total_upvotes = $linha->fetchAll(PDO::FETCH_ASSOC);
-    
+    //total_upvotes = [[valor=>1],[valor=>2]...]
     $soma = [];
     $total = 0;
 
@@ -39,7 +45,12 @@ $resultado1 = $consulta1->fetch(PDO::FETCH_ASSOC);
         $total = $total + $valor;
     }
     
-    echo json_encode(['msg' => $total, 'rel' => $resultado1]);
+    $sql_nomes = "SELECT usuarios.username,upvotes.valor FROM upvotes JOIN usuarios ON upvotes.usuarios_id = usuarios.usuarios_id WHERE upvotes.postagens_id = $postagens_id";
+    $linha_nomes = $pdo->prepare($sql_nomes);
+    $linha_nomes->execute();
+    $nomes_usuarios = $linha_nomes->fetchAll(PDO::FETCH_ASSOC);
+
+    echo json_encode(['msg' => $total, 'rel' => $resultado1, 'nomes'=> $nomes_usuarios, 'total_comment'=>$total_comment]);
     exit();
     }
 }
